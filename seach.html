@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ค้นหาข้อมูลจาก Excel</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #3498db;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    tr:hover {
+      background: #f1f1f1;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>ค้นหาข้อมูลจาก Excel</h2>
+  <input type="file" id="uploadExcel" />
+  <input type="text" id="searchInput" placeholder="กรอกรหัสหรือชื่อ">
+  <button onclick="searchData()">ค้นหา</button>
+  <div id="result"></div>
+
+  <script>
+    let excelData = [];
+
+    document.getElementById("uploadExcel").addEventListener("change", handleFile);
+
+    function handleFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        excelData = XLSX.utils.sheet_to_json(worksheet, {header:1});
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function searchData() {
+      const query = document.getElementById("searchInput").value;
+      let filtered = excelData.filter(row => row.includes(query));
+
+      if (filtered.length === 0) {
+        document.getElementById("result").innerText = "ไม่พบข้อมูล";
+        return;
+      }
+
+      // รวมชื่อ-นามสกุลเป็นคอลัมน์เดียว
+      let table = "<table><tr><th>ลำดับ</th><th>ชื่อ-นามสกุล</th><th>Email</th><th>ตำแหน่ง</th><th>Username</th></tr>";
+      filtered.forEach(row => {
+        const fullName = `${row[1]} ${row[2]} ${row[3]}`; // คำนำหน้า + ชื่อ + นามสกุล
+        table += `<tr>
+                    <td>${row[0]}</td>
+                    <td>${fullName}</td>
+                    <td>${row[4]}</td>
+                    <td>${row[5]}</td>
+                    <td>${row[8]}</td>
+                  </tr>`;
+      });
+      table += "</table>";
+
+      document.getElementById("result").innerHTML = table;
+    }
+  </script>
+</body>
+</html>
