@@ -101,7 +101,10 @@
 
     function searchData() {
       const query = document.getElementById("searchInput").value.trim();
-      let filtered = excelData.filter(row => row.includes(query));
+      // ค้นหาบางคำ (substring match)
+      let filtered = excelData.filter(row => 
+        row.some(cell => cell && cell.toString().includes(query))
+      );
 
       if (filtered.length === 0) {
         document.getElementById("result").innerHTML = "<p style='color:red;'>ไม่พบข้อมูล</p>";
