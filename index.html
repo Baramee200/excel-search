@@ -86,50 +86,56 @@
   <div id="result"></div>
 
   <script>
-    let excelData = [];
+  let excelData = [];
 
-    // โหลดไฟล์ Excel จาก repo โดยตรง
-    async function loadExcel() {
-      const response = await fetch("data.xlsx"); // ไฟล์ต้องอยู่ใน repo
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, {type: "array"});
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      excelData = XLSX.utils.sheet_to_json(worksheet, {header:1});
+  async function loadExcel() {
+    const response = await fetch("data.xlsx");
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, {type: "array"});
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    excelData = XLSX.utils.sheet_to_json(worksheet, {header:1});
+  }
+
+  loadExcel();
+
+  function searchData() {
+    const query = document.getElementById("searchInput").value.trim();
+
+    // ถ้าไม่กรอกอะไรเลย ให้ขึ้น pop-up
+    if (query === "") {
+      alert("โปรดกรอกข้อมูลก่อนทำการค้นหา");
+      return;
     }
+    // ค้นหาบางคำ (substring match)
+    let filtered = excelData.filter(row =>
+      row.some(cell => cell && cell.toString().includes(query))
+    );
 
-    loadExcel(); // โหลดทันทีเมื่อเปิดเว็บ
-
-    function searchData() {
-      const query = document.getElementById("searchInput").value.trim();
-      // ค้นหาบางคำ (substring match)
-      let filtered = excelData.filter(row => 
-        row.some(cell => cell && cell.toString().includes(query))
-      );
-
-      if (filtered.length === 0) {
-        document.getElementById("result").innerHTML = "<p style='color:red;'>ไม่พบข้อมูลโปรดตรวจสอบตัวสะกด หากตรวจสอบแล้วยังไม่พบโปรดแจ้งผู้ดูแลระบบ</p>";
-        return;
-      }
-
-      let table = "<table><tr><th>ลำดับ</th><th>ชื่อ-นามสกุล</th><th>Email</th><th>ตำแหน่ง</th><th>Username</th></tr>";
-      filtered.forEach(row => {
-        const fullName = `${row[1]} ${row[2]} ${row[3]}`;
-        table += `<tr>
-                    <td>${row[0]}</td>
-                    <td>${fullName}</td>
-                    <td>${row[4]}</td>
-                    <td>${row[5]}</td>
-                    <td>${row[8]}</td>
-                  </tr>`;
-      });
-      table += "</table>";
-
-      document.getElementById("result").innerHTML = table;
+    if (filtered.length === 0) {
+      document.getElementById("result").innerHTML =
+        "<p style='color:red;'>ไม่พบข้อมูล โปรดตรวจสอบตัวสะกด หากตรวจสอบแล้วยังไม่พบโปรดแจ้งผู้ดูแลระบบ</p>";
+      return;
     }
-  </script>
+    let table = "<table><tr><th>ลำดับ</th><th>ชื่อ-นามสกุล</th><th>Email</th><th>ตำแหน่ง</th><th>Username</th></tr>";
+    filtered.forEach(row => {
+      const fullName = `${row[1]} ${row[2]} ${row[3]}`;
+      table += `<tr>
+                  <td>${row[0]}</td>
+                  <td>${fullName}</td>
+                  <td>${row[4]}</td>
+                  <td>${row[5]}</td>
+                  <td>${row[8]}</td>
+                </tr>`;
+    });
+    table += "</table>";
+
+    document.getElementById("result").innerHTML = table;
+  }
+</script>
 </body>
 </html>
+
 
 
 
