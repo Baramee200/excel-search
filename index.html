@@ -89,7 +89,7 @@
   let excelData = [];
 
   async function loadExcel() {
-    const response = await fetch("data.xlsx");
+    const response = await fetch("1234567.xlsx");
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, {type: "array"});
     const sheetName = workbook.SheetNames[0];
@@ -135,6 +135,7 @@
 </script>
 </body>
 </html>
+
 
 
 
